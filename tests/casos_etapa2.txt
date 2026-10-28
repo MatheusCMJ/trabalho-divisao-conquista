@@ -1,0 +1,142 @@
+# Casos de teste - Etapa 2 (Par de Pontos Mais Proximos)
+#
+# Formato de cada caso:
+#   === <nome> | <justificativa>
+#   <entrada: n seguido de n linhas "x y">
+#   --- esperado
+#   <distancia>                    (6 casas decimais)
+#
+# So a distancia e comparada (tolerancia 1e-6), porque pode haver varios pares empatados.
+# O executor tambem confere se o par devolvido realmente tem a distancia informada.
+# Cada caso e executado com forca bruta e com divisao e conquista em varios limiares
+# (3, 4, 8 e o padrao 32), para que os casos pequenos exercitem a recursao e a faixa.
+
+=== dois_pontos | Menor entrada valida (n = 2)
+2
+0 0
+3 4
+--- esperado
+5.000000
+
+=== tres_colineares | Tres pontos na diagonal, dois pares empatados
+3
+0 0
+1 1
+2 2
+--- esperado
+1.414214
+
+=== duplicados | Dois pontos identicos: distancia zero
+3
+1 1
+5 5
+1 1
+--- esperado
+0.000000
+
+=== todos_iguais | Todos os pontos coincidem
+5
+2 2
+2 2
+2 2
+2 2
+2 2
+--- esperado
+0.000000
+
+=== mesma_vertical | Todos com o mesmo x: a linha da mediana passa por todos os pontos (divisao precisa usar o rank, nao o x)
+5
+0 0
+0 10
+0 3
+0 7
+0 20
+--- esperado
+3.000000
+
+=== mesma_horizontal | Todos com o mesmo y: a faixa ordenada por y fica toda empatada
+5
+0 0
+5 0
+1 0
+9 0
+7 0
+--- esperado
+1.000000
+
+=== par_cruza_linha | O par mais proximo tem um ponto de cada lado da linha divisoria
+6
+-1 0
+-10 0
+-20 0
+1 0
+10 0
+20 0
+--- esperado
+2.000000
+
+=== faixa_duas_colunas | Duas colunas intercaladas; a resposta (sqrt(3.25)) so aparece na faixa
+8
+0 0
+0 2
+0 4
+0 6
+1.5 1
+1.5 3
+1.5 5
+1.5 7
+--- esperado
+1.802776
+
+=== grade_4x4 | Grade regular: muitos pares empatados com distancia 1 e muitos pontos na faixa
+16
+0 0
+0 1
+0 2
+0 3
+1 0
+1 1
+1 2
+1 3
+2 0
+2 1
+2 2
+2 3
+3 0
+3 1
+3 2
+3 3
+--- esperado
+1.000000
+
+=== negativos_decimais | Coordenadas negativas e fracionarias
+4
+-1.5 -2.5
+2.0 3.0
+-1.0 -2.0
+10 10
+--- esperado
+0.707107
+
+=== coordenadas_grandes | Coordenadas na casa de 10^9 (sem perda de precisao em double)
+3
+1000000000 1000000000
+1000000003 1000000004
+-1000000000 -1000000000
+--- esperado
+5.000000
+
+=== par_no_canto | Par mais proximo isolado no extremo esquerdo, longe da mediana
+10
+0 0
+0.3 0.4
+100 0
+200 0
+300 0
+400 0
+500 0
+600 0
+700 0
+800 0
+--- esperado
+0.500000
