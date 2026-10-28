@@ -1,0 +1,6 @@
+Java 25.0.4.1 (OpenJDK 64-Bit Server VM) | Windows 11 amd64 | 20 nucleos logicos | heap max 6144 MB
+limiar n=1000
+limiar n=10000
+limiar n=100000
+limiar n=1000000
+sink=215906616
