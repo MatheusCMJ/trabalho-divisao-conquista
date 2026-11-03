@@ -1,0 +1,288 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<title>Relatório: Divisão e Conquista</title>
+<style>
+  @page { size: A4; margin: 17mm 16mm 16mm 16mm; }
+  :root { --ink: #1d1d1b; --muted: #5a5955; --rule: #d9d8d3; --accent: #2a78d6; }
+  body { font-family: "Segoe UI", Calibri, Arial, sans-serif; color: var(--ink); background: #fff;
+         font-size: 10.3pt; line-height: 1.42; margin: 0; }
+  h1 { font-size: 17pt; margin: 0 0 2px; }
+  h2 { font-size: 12.5pt; margin: 16px 0 5px; padding-bottom: 2px; border-bottom: 1.5px solid var(--accent); break-after: avoid; }
+  h3 { font-size: 10.8pt; margin: 10px 0 3px; break-after: avoid; }
+  p { margin: 4px 0 6px; text-align: justify; }
+  ul, ol { margin: 3px 0 6px; padding-left: 20px; }
+  li { margin: 1px 0; }
+  .cab { border-bottom: 1px solid var(--rule); padding-bottom: 8px; margin-bottom: 6px; }
+  .cab .meta { color: var(--muted); font-size: 10pt; }
+  code, .mono { font-family: Consolas, "Cascadia Mono", monospace; font-size: 9.2pt; }
+  pre { font-family: Consolas, monospace; font-size: 8.6pt; background: #f6f6f3; border: 1px solid var(--rule);
+        border-radius: 4px; padding: 6px 8px; margin: 4px 0 8px; line-height: 1.32; white-space: pre-wrap; break-inside: avoid; }
+  .eq { text-align: center; margin: 5px 0 7px; font-family: "Cambria Math", Cambria, serif; font-size: 11pt; }
+  table { border-collapse: collapse; width: 100%; font-size: 8.6pt; margin: 4px 0 8px; break-inside: avoid; }
+  th, td { border-bottom: 1px solid var(--rule); padding: 2.5px 5px; text-align: left; vertical-align: top; }
+  th { background: #f2f2ef; font-weight: 600; }
+  td.r, th.r { text-align: right; }
+  .sub { font-weight: 400; color: var(--muted); font-size: 7.8pt; }
+  .fig { break-inside: avoid; margin: 6px 0 8px; }
+  .fig svg { width: 100%; height: auto; display: block; }
+  .duas { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .leg-fig { font-size: 8.6pt; color: var(--muted); margin-top: 1px; text-align: center; }
+  .caixa { border-left: 3px solid var(--accent); background: #f4f8fd; padding: 5px 9px; margin: 6px 0 8px; break-inside: avoid; }
+  svg .ct { font: 600 13px "Segoe UI", Arial, sans-serif; fill: #1d1d1b; }
+  svg .tick { font: 11px "Segoe UI", Arial, sans-serif; fill: #5a5955; }
+  svg .lab { font: 11.5px "Segoe UI", Arial, sans-serif; fill: #5a5955; }
+  svg .leg { font: 11.5px "Segoe UI", Arial, sans-serif; fill: #1d1d1b; }
+  svg .grid { stroke: #e7e6e1; stroke-width: 1; }
+  svg .axis { stroke: #9a9993; stroke-width: 1; }
+  svg .ref { fill: none; stroke: #8a8984; stroke-width: 1.2; stroke-dasharray: 3 3; }
+  svg .reflab { font: italic 11px "Segoe UI", Arial, sans-serif; fill: #6a6964; }
+  .quebra { break-before: page; }
+</style>
+</head>
+<body>
+
+<div class="cab">
+  <h1>Trabalho Prático: Divisão e Conquista</h1>
+  <div class="meta">Dupla: <b>Matheus Cruz</b> e <b>Enzo Fernandes</b> · Linguagem: Java · Outubro de 2026</div>
+</div>
+
+<h2>1. Introdução e ambiente</h2>
+<p>Implementamos dois problemas resolvidos por divisão e conquista: o <b>subarranjo de soma máxima</b> (Etapa 1) e o
+<b>par de pontos mais próximos</b> (Etapa 2). Cada um tem uma versão de força bruta O(n²) e uma de divisão e conquista
+O(n log n); na Etapa 1 implementamos também o algoritmo de Kadane, O(n), como questão desafio. Todas as versões
+foram validadas por uma bateria de testes e medidas experimentalmente (Etapa 3). O código, os casos de teste, os CSVs
+com as medições brutas e as instruções de execução estão no repositório (ver <code>README.md</code>).</p>
+<p><b>Máquina usada nas medições:</b> notebook com Intel Core i7-12700H (14 núcleos, 20 threads, até 4,7 GHz),
+16 GB de RAM, Windows 11 Pro 64 bits, OpenJDK 25.0.4 (HotSpot 64-Bit Server VM), executado com <code>-Xmx6g</code>.
+Os programas são de uma única thread.</p>
+
+<h2>2. Etapa 1 — Subarranjo de soma máxima</h2>
+<p><b>Entrada:</b> n e uma sequência de n inteiros (variações diárias). <b>Saída:</b> a soma máxima e os índices
+de início e fim (base 0, intervalo fechado). Convenções adotadas por todas as implementações: o subarranjo nunca é
+vazio (se todos os valores forem negativos, a resposta é o maior elemento) e, em caso de <b>empate</b>, vence o
+intervalo de menor início e, persistindo o empate, o de menor fim. Os acumuladores são de 64 bits
+(<code>long</code>), pois a soma de valores <code>int</code> pode passar de 2³¹−1.</p>
+
+<h3>2.1 Força bruta</h3>
+<p>Para cada início i, percorre os fins j ≥ i acumulando a soma, de forma que cada intervalo custa O(1). Atualiza a
+melhor resposta só quando a soma é <i>estritamente</i> maior, o que mantém o primeiro intervalo na ordem (i, j) e
+implementa a regra de desempate. O número de intervalos testados é</p>
+<div class="eq">T(n) = Σ<sub>i=0</sub><sup>n−1</sup> (n − i) = n(n+1)/2 = Θ(n²).</div>
+
+<h3>2.2 Divisão e conquista</h3>
+<p>Divide o vetor <code>a[lo..hi]</code> no meio <code>mid</code>, resolve recursivamente as duas metades e calcula,
+em O(n), o melhor subarranjo que cruza o meio: o melhor sufixo de <code>a[lo..mid]</code> (varrendo de
+<code>mid</code> para a esquerda) somado ao melhor prefixo de <code>a[mid+1..hi]</code>. A resposta é a melhor das
+três candidatas. Como a escolha do sufixo e a do prefixo são independentes, basta, em empates, ficar com o sufixo
+que começa mais à esquerda (comparação <code>&gt;=</code>) e com o prefixo que termina mais à esquerda
+(<code>&gt;</code>); a comparação final entre as três candidatas usa a mesma regra (maior soma, menor início, menor
+fim). A recorrência é</p>
+<div class="eq">T(1) = Θ(1),  T(n) = T(⌈n/2⌉) + T(⌊n/2⌋) + Θ(n).</div>
+<p>Pelo Teorema Mestre, com a = 2, b = 2 e f(n) = Θ(n) = Θ(n<sup>log<sub>2</sub>2</sup>), estamos no caso 2, logo
+<b>T(n) = Θ(n log n)</b>. Pela árvore de recursão: há log₂n níveis e em cada nível os subproblemas somam n elementos,
+com custo cn por nível, totalizando cn·log₂n.</p>
+
+<h3>2.3 Questão desafio — Kadane, O(n)</h3>
+<p>Mantém <code>cur</code>, a melhor soma de um subarranjo que termina na posição j. Se <code>cur ≥ 0</code>, vale a pena
+estender o subarranjo anterior; senão, começa-se um novo em j. A melhor resposta é atualizada quando
+<code>cur</code> fica estritamente maior que ela. Estender também quando <code>cur = 0</code> mantém o início mais à
+esquerda e, com isso, a mesma regra de desempate das outras versões (conferido nos testes aleatórios). Recorrência:
+T(n) = T(n−1) + Θ(1) = <b>Θ(n)</b>. É uma programação dinâmica: a resposta "terminando em j" é obtida a partir da
+resposta "terminando em j−1".</p>
+
+<h2>3. Etapa 2 — Par de pontos mais próximos</h2>
+<p><b>Entrada:</b> n e as coordenadas reais (x, y) de n estações. <b>Saída:</b> a menor distância euclidiana e os
+índices dos dois pontos. Para evitar raízes quadradas, as comparações usam a distância ao quadrado.</p>
+<h3>3.1 Força bruta</h3>
+<p>Compara todos os pares: n(n−1)/2 comparações, isto é, <b>Θ(n²)</b>.</p>
+<h3>3.2 Divisão e conquista</h3>
+<ol>
+  <li><b>Pré-processamento (uma vez):</b> ordenar os índices dos pontos por x (<code>Px</code>) e por y
+  (<code>Py</code>) com o <code>Arrays.sort</code> da biblioteca padrão — Θ(n log n). Cada ponto guarda sua posição
+  (<i>rank</i>) em <code>Px</code>.</li>
+  <li><b>Dividir:</b> a linha vertical passa pela mediana das coordenadas x, <code>x<sub>m</sub> = Px[n/2].x</code>.
+  A metade esquerda são os pontos com rank &lt; n/2. Separar por rank (e não por x) garante metades corretas mesmo
+  quando muitos pontos têm x igual ao da mediana. <code>Py</code> é particionado em <code>Py<sub>E</sub></code> e
+  <code>Py<sub>D</sub></code> em O(n), preservando a ordem por y, sem nova ordenação.</li>
+  <li><b>Conquistar:</b> resolver cada lado recursivamente, obtendo δ = min(δ<sub>E</sub>, δ<sub>D</sub>).</li>
+  <li><b>Combinar:</b> montar a faixa com os pontos de <code>Py</code> com |x − x<sub>m</sub>| &lt; δ (já
+  ordenados por y) e comparar cada ponto apenas com os <b>até 7 seguintes</b>, parando antes se a diferença em y
+  chegar a δ.</li>
+  <li><b>Limiar:</b> subproblemas com até <b>32</b> pontos são resolvidos por força bruta (seção 6.3).</li>
+</ol>
+<p>Cada chamada faz trabalho linear (particionar <code>Py</code>, montar a faixa e no máximo 7m comparações para uma
+faixa de m ≤ n pontos), então</p>
+<div class="eq">T(n) = 2T(n/2) + Θ(n) = Θ(n log n),  e o total é Θ(n log n) [ordenação] + Θ(n log n) [recursão] = <b>Θ(n log n)</b>.</div>
+<p>Com limiar t, a recursão para em n/t folhas de custo Θ(t²) cada: o custo vira Θ(n·t) + Θ(n·log(n/t)), que
+continua Θ(n log n) para t constante.</p>
+
+<h3>3.3 Por que bastam 7 comparações por ponto na faixa</h3>
+<div class="caixa">
+<p>Seja p um ponto da faixa e considere os pontos q que vêm depois dele na ordem por y e que ainda podem estar a
+distância &lt; δ: eles têm y<sub>p</sub> ≤ y<sub>q</sub> &lt; y<sub>p</sub> + δ e |x<sub>q</sub> − x<sub>m</sub>| &lt; δ.
+Todos estão, portanto, no retângulo R de largura 2δ e altura δ com base em y<sub>p</sub> e centro na linha divisória.
+Divida R em 8 quadrados de lado δ/2 (4 de cada lado da linha). Cada quadrado contém <b>no máximo um ponto</b>: dois
+pontos no mesmo quadrado estariam do mesmo lado da linha e a uma distância de no máximo a diagonal
+δ/√2 &lt; δ, contradizendo o fato de que δ é menor ou igual à menor distância entre pontos de um mesmo lado.
+(Pontos exatamente sobre a linha pertencem a um único lado, pelo rank, e cada lado usa só os seus 4 quadrados.)
+Logo R contém no máximo 8 pontos, sendo um deles o próprio p; restam <b>no máximo 7</b> candidatos depois de p na
+ordem por y. Qualquer ponto mais adiante na lista tem y ≥ y<sub>p</sub> + δ e não pode melhorar a resposta. Pares em
+que q vem antes de p já foram examinados quando q foi o ponto de referência.</p>
+</div>
+
+<h2>4. Testes</h2>
+<p>O programa <code>TestRunner</code> executa duas baterias e termina com código 0 apenas se tudo passar:</p>
+<ol>
+  <li><b>Casos fixos</b> (<code>tests/casos_etapa1.txt</code> e <code>tests/casos_etapa2.txt</code>), cada um com
+  entrada, saída esperada calculada à mão e justificativa. Todas as implementações rodam em todos os casos. Na
+  Etapa 2, a divisão e conquista roda com limiares 3, 4, 8 e 32, para que até os casos pequenos passem pela recursão
+  e pela faixa, em vez de caírem direto na força bruta.</li>
+  <li><b>Testes aleatórios contra a força bruta:</b> 3.000 vetores (n de 1 a 300, com valores em faixas estreitas
+  para provocar muitos empates e muitos zeros, e às vezes quase só negativos), exigindo soma <i>e índices</i>
+  idênticos; e 2.000 conjuntos de pontos (n de 2 a 600, metade com coordenadas inteiras pequenas, o que gera x
+  repetidos, pontos duplicados e empates de distância), com limiares de 3 a 32.</li>
+</ol>
+<p>Resultado: <b>8.120 verificações, 0 falhas</b>. Casos de borda e justificativas:</p>
+<table>
+<thead><tr><th style="width:24%">Caso (Etapa 1)</th><th>Por que é importante</th></tr></thead>
+<tbody>
+<tr><td>tamanho 1 (positivo, negativo, zero)</td><td>Caso base da recursão; com valor negativo a resposta não pode ser o vetor vazio de soma 0.</td></tr>
+<tr><td>todos negativos (com repetição), todos iguais</td><td>A resposta é o maior elemento; o máximo aparece duas vezes e deve vencer o primeiro.</td></tr>
+<tr><td>Integer.MIN_VALUE; soma &gt; 2³¹−1</td><td>Detecta estouro: o acumulador precisa ser de 64 bits.</td></tr>
+<tr><td>todos positivos; todos zeros; dois elementos</td><td>Vetor inteiro como resposta; empate total; menor caso que divide.</td></tr>
+<tr><td>exemplos clássicos; cruza o meio; resposta no fim</td><td>Garantem que a combinação (subarranjo que cruza o meio) e as bordas estão corretas.</td></tr>
+<tr><td>empates: disjuntos, três regiões, mesmo início, mesmo fim, aninhados, cruzando × lado</td><td>Exercitam a regra de desempate em cada ponto onde ela pode falhar: dentro de uma metade, no sufixo, no prefixo e na comparação final das três candidatas.</td></tr>
+</tbody></table>
+<table>
+<thead><tr><th style="width:24%">Caso (Etapa 2)</th><th>Por que é importante</th></tr></thead>
+<tbody>
+<tr><td>dois pontos; três colineares</td><td>Menor entrada válida; empate entre pares.</td></tr>
+<tr><td>duplicados; todos iguais</td><td>Distância zero; muitos pontos na mesma posição.</td></tr>
+<tr><td>mesma vertical; mesma horizontal</td><td>Todos com o x da mediana (divisão precisa usar o rank); faixa toda empatada em y.</td></tr>
+<tr><td>par cruza a linha; duas colunas intercaladas</td><td>A resposta só é encontrada na faixa — testam a etapa de combinação.</td></tr>
+<tr><td>grade 4×4</td><td>Muitos empates de distância e muitos pontos simultâneos na faixa (exercita o limite de 7).</td></tr>
+<tr><td>negativos/decimais; coordenadas ~10⁹; par isolado no canto</td><td>Precisão numérica e par mais próximo longe da mediana.</td></tr>
+</tbody></table>
+
+<h2>5. Metodologia experimental</h2>
+<p>O programa <code>Benchmark</code> mede cada algoritmo em tamanhos que dobram a cada passo (100, 200, …, 6.400,
+como no enunciado, e depois tamanhos maiores, até 1.638.400 para os algoritmos rápidos). Para cada tamanho são
+feitas <b>10 execuções</b>, cada uma com uma entrada aleatória nova (semente fixa): inteiros uniformes em
+[−1000, 1000] na Etapa 1 e pontos uniformes no quadrado [0, 10⁶)² na Etapa 2. Antes das medições o JIT é aquecido.
+Quando uma chamada leva menos de 2 ms, ela é repetida até somar 2 ms e registra-se o tempo médio por chamada. Os
+tempos brutos estão em <code>resultados/tempos.csv</code>, <code>limiar.csv</code> e <code>cruzamento.csv</code>.
+As tabelas mostram média ± desvio padrão das 10 execuções e a razão T(n)/T(n/2): pela análise, ela deve tender a
+<b>4</b> para Θ(n²), a <b>pouco mais de 2</b> para Θ(n log n) (2·log(n)/log(n/2)) e a <b>2</b> para Θ(n).</p>
+
+<h2>6. Resultados</h2>
+<h3>6.1 Etapa 1 — subarranjo de soma máxima</h3>
+<p><b>Tabela 1.</b> Tempo médio por execução (10 execuções por tamanho) e razão entre tamanhos consecutivos.</p>
+{{tab_etapa1.html}}
+<p><b>Tabela 2.</b> Tamanhos maiores (a força bruta foi medida até 51.200).</p>
+{{tab_etapa1_grande.html}}
+<div class="fig">{{fig_etapa1.svg}}
+<div class="leg-fig">Figura 1. Etapa 1 em escala log-log: uma reta de inclinação k indica tempo ∝ n<sup>k</sup>. A linha tracejada cinza é c·n² ajustada ao último ponto da força bruta.</div></div>
+
+<h3>6.2 Etapa 2 — par de pontos mais próximos</h3>
+<p><b>Tabela 3.</b> Tempo médio por execução; a divisão e conquista inclui a ordenação inicial e usa limiar 32.</p>
+{{tab_etapa2.html}}
+<p><b>Tabela 4.</b> Tamanhos maiores (a força bruta foi medida até 25.600).</p>
+{{tab_etapa2_grande.html}}
+<div class="fig">{{fig_etapa2.svg}}
+<div class="leg-fig">Figura 2. Etapa 2 em escala log-log, com as curvas c·n² e c·n log n ajustadas ao último ponto de cada algoritmo.</div></div>
+
+<div class="duas">
+<div class="fig">{{fig_normalizado.svg}}<div class="leg-fig">Figura 3. Etapa 1: tempo dividido pela complexidade prevista. Linha horizontal = previsão confirmada.</div></div>
+<div class="fig">{{fig_normalizado2.svg}}<div class="leg-fig">Figura 4. O mesmo para a Etapa 2.</div></div>
+</div>
+
+<p><b>Tabela 5.</b> Divisão do tempo da divisão e conquista da Etapa 2 entre a ordenação inicial e a fase recursiva
+(média de 20 execuções, <code>resultados/limiar.csv</code>).</p>
+{{tab_fases.html}}
+
+<h3>6.3 Escolha do limiar da Etapa 2</h3>
+<p>Medimos só a fase recursiva (a ordenação inicial não depende do limiar) para 13 limiares entre 3 (recursão até o
+fim, sem atalho) e 256, com n = 1.000, 10.000, 100.000 e 1.000.000, 20 execuções cada. A Figura 5 mostra o tempo de
+cada limiar dividido pelo melhor tempo obtido para aquele n.</p>
+<div class="duas">
+<div class="fig">{{fig_limiar.svg}}<div class="leg-fig">Figura 5. Fase recursiva da Etapa 2 em função do limiar (1 = melhor limiar para o n).</div></div>
+<div class="fig">{{fig_cruzamento1.svg}}<div class="leg-fig">Figura 6. Etapa 1 em entradas pequenas: as curvas se cruzam entre n = 128 e n = 192.</div></div>
+</div>
+
+<h2>7. Discussão</h2>
+<h3>7.1 Comportamento observado × previsto</h3>
+<ul>
+<li><b>Forças brutas (Θ(n²)).</b> Nas duas etapas a razão T(n)/T(n/2) fica entre 3,7 e 4,3, em torno de 4, e a
+inclinação da reta log-log ajustada (n ≥ 1.600) é <b>1,99</b> na Etapa 1 e <b>2,00</b> na Etapa 2. Nas Figuras 3
+e 4 a curva tempo/n² é praticamente horizontal. A previsão quadrática se confirma com folga, o que é esperado:
+são dois laços aninhados sobre vetores contíguos, sem alocação, e o custo por iteração é constante.</li>
+<li><b>Divisão e conquista da Etapa 1 (Θ(n log n)).</b> As razões ficam entre 1,86 e 2,25 (média ≈ 2,07),
+compatíveis com o valor teórico 2·log(n)/log(n/2), que vai de ≈ 2,15 (n = 200) a ≈ 2,05 (n = 1,6 milhão). A
+inclinação ajustada é 1,08 — maior que 1 por causa do fator log n, mas longe de 2. Na Figura 3, a curva tempo/(n log n) começa alta (custos fixos das chamadas recursivas pesam mais em n pequeno) e
+fica aproximadamente horizontal a partir de n ≈ 1.600.</li>
+<li><b>Kadane (Θ(n)).</b> Razões próximas de 2 e inclinação 1,04. Em n pequeno o tempo (≈ 100 ns) é dominado
+por custos fixos da chamada, por isso as primeiras razões ficam abaixo de 2 e a curva normalizada da Figura 3
+começa acima de 1. Em n = 102.400 há um degrau (razão 2,75): o custo por elemento sobe cerca de 40% e se mantém
+nos tamanhos seguintes, o que indica um efeito de memória (o vetor sai dos níveis mais rápidos de cache), e não uma
+mudança de complexidade — depois do degrau as razões voltam para ≈ 2.</li>
+<li><b>Divisão e conquista da Etapa 2 (Θ(n log n)).</b> A partir de n = 1.600 as razões ficam entre 2,14 e 2,40,
+inclinação 1,15. Na Figura 4, a curva tempo/(n log n) fica quase horizontal entre n = 1.600 e n = 102.400 (de 0,65 a 0,75) e sobe
+para 1 nos maiores tamanhos.
+A causa é a hierarquia de memória, que a análise assintótica não modela: com mais de 400 mil pontos os vetores
+auxiliares (coordenadas, índices, ranks e chaves de ordenação) passam de dezenas de MB e excedem o cache L3 de
+24 MB, e os acessos indiretos (<code>xs[Py[k]]</code>, buscas binárias da ordenação) passam a ir à memória
+principal. Em n ≤ 800 a curva também sobe e as razões oscilam (2,75; 4,00; 2,91): são tempos de poucas dezenas de
+microssegundos, em que a mistura de custos muda com n (folhas de força bruta, e o <code>Arrays.sort</code>
+usa ordenação por inserção para vetores pequenos e outro algoritmo para os maiores).</li>
+</ul>
+<p>A Tabela 5 mostra outro ponto: a <b>ordenação inicial</b> responde por 76% a 91% do tempo da divisão e
+conquista da Etapa 2. A fase recursiva (a parte que o enunciado pede para focar) é rápida: para 1 milhão de pontos
+leva 0,18 s, contra 0,56 s da ordenação. As duas fases são Θ(n log n), mas a ordenação tem constante maior, porque
+ordena índices duas vezes (por x e por y) e precisa de buscas binárias para montar as chaves.</p>
+
+<h3>7.2 Por que a força bruta vence em entradas pequenas e a técnica vence nas grandes</h3>
+<p>Em notação assintótica, c₁n² &gt; c₂n log n para n grande quaisquer que sejam as constantes, mas para n pequeno
+são as constantes que decidem. A força bruta tem a menor constante possível: laços simples, acesso sequencial à
+memória, nenhuma chamada de método e nenhuma alocação. A divisão e conquista paga, a cada nível, chamadas recursivas,
+cálculo do meio e comparação de três candidatas (Etapa 1) ou alocação dos vetores <code>Py<sub>E</sub></code>/
+<code>Py<sub>D</sub></code>, montagem da faixa e raízes quadradas (Etapa 2), além da ordenação inicial na Etapa 2.</p>
+<ul>
+<li><b>Etapa 1:</b> a força bruta é mais rápida até n ≈ 128 (1,7 µs contra 1,8 µs) e perde a partir de n ≈ 192
+(4,0 µs contra 2,3 µs) — Figura 6. Em n = 6.400 a divisão e conquista já é 44 vezes mais rápida
+(108 µs contra 4,8 ms) e em n = 51.200, 300 vezes. O Kadane é ainda mais rápido em todos os tamanhos medidos, pois
+tem a constante pequena da força bruta <i>e</i> complexidade linear.</li>
+<li><b>Etapa 2:</b> o cruzamento acontece entre n = 800 (162 µs contra 200 µs, força bruta à frente) e n = 1.600
+(661 µs contra 452 µs). Ele acontece bem mais tarde que na Etapa 1 porque a constante da divisão e conquista inclui
+a ordenação inicial, que sozinha custa cerca de 0,23 ms para 1.000 pontos. Daí em diante a vantagem cresce
+rapidamente: 4,5 vezes em n = 6.400 e 15,6 vezes em n = 25.600 (167 ms contra 10,7 ms). Extrapolando a curva
+quadrática para 1,6 milhão de pontos, a força bruta levaria cerca de 11 minutos; a divisão e conquista levou 1,4 s.</li>
+</ul>
+
+<h3>7.3 Justificativa do limiar escolhido (Etapa 2)</h3>
+<p>O limiar t equilibra dois custos. Resolver as folhas por força bruta custa cerca de (n/t)·t²/2 = n·t/2
+comparações, que crescem linearmente com t. Cada nível de recursão eliminado economiza um passo de combinação de custo
+linear, que é caro na prática (chamada recursiva, alocação e preenchimento de <code>Py<sub>E</sub></code> e
+<code>Py<sub>D</sub></code>, varredura para montar a faixa, raízes quadradas). Um limiar maior elimina cerca de log₂t
+níveis. Para t pequeno, cada comparação extra na folha é muito mais barata que o nível de recursão que ela evita;
+para t grande, o custo quadrático das folhas passa a dominar.</p>
+<p>Os dados confirmam esse comportamento em formato de "U" (Figura 5). Sem limiar (t = 3), a fase recursiva é de
+36% a 137% mais lenta que no melhor caso. Com t = 128 ou 256 o custo quadrático das folhas aparece (até 4,3 vezes
+mais lento para n = 1.000). Entre 24 e 48 há um platô: a média geométrica do tempo relativo nos quatro tamanhos é
+1,017 (t = 24), 1,022 (t = 32) e 1,019 (t = 48), diferenças menores que o ruído das medições. Escolhemos
+<b>t = 32</b>, no centro do platô: em todos os quatro tamanhos ele fica a no máximo 4% do melhor limiar medido, e
+fica longe das duas bordas do "U", onde o desempenho piora rápido. Note que o limiar não muda a complexidade (é uma
+constante); ele só melhora a constante, reduzindo o tempo da fase recursiva em 26% a 56% em relação à recursão completa.</p>
+
+<h2>8. Conclusão</h2>
+<p>As cinco implementações passaram em todos os testes, incluindo os casos de borda pedidos (somente negativos,
+tamanho 1 e empates) e os testes aleatórios contra a força bruta. Os experimentos confirmaram as complexidades obtidas
+pelas recorrências: Θ(n²) para as forças brutas (razão ≈ 4 ao dobrar n, inclinação 2,0), Θ(n log n) para as duas
+divisões e conquistas (razão ≈ 2,1–2,3) e Θ(n) para o Kadane (razão ≈ 2). Os desvios observados vêm de fatores que a
+análise assintótica ignora — custos fixos em entradas pequenas e cache em entradas grandes —, e não mudam a ordem de
+crescimento. A força bruta só vale a pena em entradas muito pequenas (até ~130 elementos na Etapa 1 e ~1.000 pontos
+na Etapa 2); essa mesma observação justifica usar força bruta dentro da recursão da Etapa 2 para subproblemas com até
+32 pontos.</p>
+</body>
+</html>
